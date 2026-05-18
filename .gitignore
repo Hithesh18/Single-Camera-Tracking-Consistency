@@ -1,0 +1,57 @@
+# ── Model weights ──────────────────────────────────────────────────────────────
+*.pth
+*.pth.tar
+*.pt
+*.onnx
+*.trt
+
+# ── Dataset files (stored on HuggingFace, not in repo) ─────────────────────────
+*.mp4
+*.h5
+AIC25_Track1/**/calibration.json
+AIC25_Track1/**/ground_truth.json
+AIC25_Track1/**/annotations/
+
+# ── Pipeline outputs (generated at runtime) ────────────────────────────────────
+Detection/
+EmbedFeature/
+Tracking/
+Submission/
+YOLOX_outputs/
+YOLOX_datadir/
+vis_results/
+coco_annotations/
+TrackEval/aicity_25_data/
+TrackEval/data/
+
+# ── Extracted frames (generated from videos by extract_frames_25.py) ───────────
+**/Frame/
+*.jpg
+*.png
+
+# ── Python build artifacts ────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+*.so
+.Python
+
+# ── Virtual environment ───────────────────────────────────────────────────────
+.venv/
+.env
+
+# ── Jupyter ───────────────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+
+# ── Logs and experiment outputs ───────────────────────────────────────────────
+*.log
+wandb/
+tensorboard_logs/
+
+# ── OS metadata ───────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db

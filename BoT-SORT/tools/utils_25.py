@@ -27,7 +27,8 @@ _COLORS = np.random.randint(0, 255, size=(500, 3), dtype=np.uint8)
 def load_depth_map(h5_path):
     import h5py
     if not os.path.exists(h5_path):
-        raise FileNotFoundError(f"Depth HDF5 not found: {h5_path}")
+        print(f"\033[33m[WARN]\033[0m Depth map not found: {h5_path} — 3D world coords will be skipped.")
+        return None
     return h5py.File(h5_path, 'r')
 
 

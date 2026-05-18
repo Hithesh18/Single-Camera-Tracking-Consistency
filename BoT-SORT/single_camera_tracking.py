@@ -75,9 +75,10 @@ def run_botsort_tracking(frame_detections: OrderedDict, args, save_dir=None):
     
 
 
-    if args.dataset == "Val" or args.dataset == "Train":
+    gt_path = f"AIC25_Track1/{args.dataset}/{args.scene_id}/ground_truth.json"
+    if (args.dataset == "Val" or args.dataset == "Train") and os.path.exists(gt_path):
         # Load gt (for visualization of boxes and 3D points)
-        with open(f"AIC25_Track1/{args.dataset}/{args.scene_id}/ground_truth.json", "r") as f:
+        with open(gt_path, "r") as f:
             gt_data = json.load(f)
         scales_by_class = compute_average_3d_scales(gt_data)
         for cls, stat in scales_by_class.items():
@@ -88,7 +89,8 @@ def run_botsort_tracking(frame_detections: OrderedDict, args, save_dir=None):
             if class_name in CLASS_NAME_TO_ID
         }
     else:
-        # Use fixed values from val statistics
+        if args.dataset in ("Val", "Train"):
+            print(f"\033[33m[WARN]\033[0m ground_truth.json not found at {gt_path} — using fixed scales.")
         CLASS_ID_TO_SCALE = {
             CLASS_NAME_TO_ID[class_name]: scale
             for class_name, scale in FIXED_SCALES_BY_CLASS.items()
