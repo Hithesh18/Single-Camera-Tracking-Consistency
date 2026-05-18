@@ -27,6 +27,7 @@ def make_parser():
     parser = argparse.ArgumentParser("reid")
     parser.add_argument("root_path", type=str, default=None)
     parser.add_argument("-s", "--scene", type=str, default=None)
+    parser.add_argument("--dataset", default="Val", type=str, help="dataset split: Val or Train")
     return parser
 
 if __name__ == "__main__":
@@ -37,9 +38,7 @@ if __name__ == "__main__":
 
     sys.path.append(data_root+'/deep-person-reid')
 
-    # img_dir = os.path.join(data_root,'Original')
-    img_dir = os.path.join(data_root, "AIC25_Track1/Val", scene, "videos")
-    # img_dir = os.path.join(data_root, "AIC25_Track1/Test", scene, "videos")
+    img_dir = os.path.join(data_root, "AIC25_Track1", args.dataset, scene, "videos")
     
     det_dir = os.path.join(data_root,'Detection')
     out_dir = os.path.join(data_root,'EmbedFeature')
@@ -65,10 +64,11 @@ if __name__ == "__main__":
 
         print('Using model {}'.format(name))
 
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
         extractor = FeatureExtractor(
             model_name=model_name,
             model_path=model_p,
-            device='cuda'
+            device=device
         )   
 
         for file in os.listdir(os.path.join(det_dir,scene)):

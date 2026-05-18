@@ -338,6 +338,9 @@ def main(exp, args):
 
     if args.trt:
         args.device = "gpu"
+    if args.device == "gpu" and not torch.cuda.is_available():
+        logger.warning("CUDA not available — falling back to CPU (inference will be slow)")
+        args.device = "cpu"
     args.device = torch.device("cuda" if args.device == "gpu" else "cpu")
 
     logger.info("Args: {}".format(args))
