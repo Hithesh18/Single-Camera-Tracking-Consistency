@@ -97,6 +97,8 @@ class FeatureExtractor(object):
 
         to_pil = T.ToPILImage()
 
+        if not torch.cuda.is_available() and str(device).startswith('cuda'):
+            device = 'cpu'
         device = torch.device(device)
         model.to(device)
 

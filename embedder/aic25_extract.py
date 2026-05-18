@@ -65,11 +65,13 @@ if __name__ == "__main__":
 
         print('Using model {}'.format(name))
 
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        print(f'[INFO] Using device: {device}')
         extractor = FeatureExtractor(
             model_name=model_name,
             model_path=model_p,
-            device='cuda'
-        )   
+            device=device
+        )
 
         for file in os.listdir(os.path.join(det_dir,scene)):
             base, ext = os.path.splitext(file)

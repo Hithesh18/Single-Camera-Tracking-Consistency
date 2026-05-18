@@ -48,6 +48,8 @@ def make_parser():
     parser.add_argument("--fp16", dest="fp16", default=False, action="store_true",help="Adopting mix precision evaluating.")
     parser.add_argument("--fuse", dest="fuse", default=False, action="store_true", help="Fuse conv and bn for testing.")
     parser.add_argument("--trt", dest="trt", default=False, action="store_true", help="Using TensorRT model for testing.")
+    parser.add_argument("--camera", default=None, type=str, help="run on single camera only, e.g. Camera or Camera_01")
+    parser.add_argument("--max_frames", default=0, type=int, help="limit frames per camera (0 = all frames)")
 
     # tracking args
     parser.add_argument("--track_high_thresh", type=float, default=0.6, help="tracking confidence threshold")
@@ -174,9 +176,17 @@ def image_demo(predictor, vis_folder, current_time, args):
         if os.path.isdir(os.path.join(input, f)):
             cameras.append(f)
     cameras = sorted(cameras)
+    if args.camera:
+        cameras = [c for c in cameras if c == args.camera]
+        if not cameras:
+            logger.error(f"Camera '{args.camera}' not found. Available: {sorted(os.listdir(input))}")
+            return
     scale = min(800/1080,1440/1920)
     for cam in cameras:
         imgs = sorted(os.listdir(osp.join(input, cam, 'Frame')))
+        if args.max_frames > 0:
+            imgs = imgs[:args.max_frames]
+            logger.info(f"Limiting to {args.max_frames} frames for camera {cam}")
         timer = Timer()
         output = osp.join(root_path,'Detection', '{}.txt'.format(osp.join(scene, cam)))
         outjson = osp.join(root_path,'Detection', '{}.json'.format(osp.join(scene, cam)))
