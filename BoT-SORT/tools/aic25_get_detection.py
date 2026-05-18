@@ -48,6 +48,7 @@ def make_parser():
     parser.add_argument("--fp16", dest="fp16", default=False, action="store_true",help="Adopting mix precision evaluating.")
     parser.add_argument("--fuse", dest="fuse", default=False, action="store_true", help="Fuse conv and bn for testing.")
     parser.add_argument("--trt", dest="trt", default=False, action="store_true", help="Using TensorRT model for testing.")
+    parser.add_argument("--dataset", default="Val", type=str, help="dataset split: Val or Train")
     parser.add_argument("--camera", default=None, type=str, help="run on single camera only, e.g. Camera or Camera_01")
     parser.add_argument("--max_frames", default=0, type=int, help="limit frames per camera (0 = all frames)")
 
@@ -169,7 +170,7 @@ def image_demo(predictor, vis_folder, current_time, args):
     root_path = args.root_path
     scene = args.scene
     # input = osp.join(root_path, "Original", scene)
-    input = osp.join(root_path, "AIC25_Track1/Val", scene, "videos")
+    input = osp.join(root_path, "AIC25_Track1", args.dataset, scene, "videos")
     # input = osp.join(root_path, "AIC25_Track1/Test", scene, "videos")
     cameras = []
     for f in os.listdir(input):
