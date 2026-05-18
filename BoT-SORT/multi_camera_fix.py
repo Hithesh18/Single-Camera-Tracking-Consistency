@@ -76,7 +76,7 @@ def main():
 
     
     # Load the JSON data
-    with open("AIC25_Track1/Val/Warehouse_016/ground_truth.json", "r") as f:
+    with open(f"AIC25_Track1/{args.dataset}/{args.scene_id}/ground_truth.json", "r") as f:
         ground_truth_json = json.load(f)
     # with open(f"Tracking/Multicamera/Warehouse_016/{args.exp_path}/output_result/final_track_Warehouse_016_fix.json", "r") as f:
     #     framewise_json = json.load(f)
