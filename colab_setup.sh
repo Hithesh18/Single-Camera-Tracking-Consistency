@@ -12,27 +12,35 @@ echo "[1/6] Repo root: $REPO_ROOT"
 # ── 1. Install BoT-SORT + YOLOX dependencies ─────────────────────────────────
 echo "[2/6] Installing BoT-SORT dependencies..."
 cd "$REPO_ROOT/BoT-SORT"
-pip install -q -r requirements.txt
-pip install -q cython_bbox pycocotools faiss-gpu
+python -m pip install -q --upgrade pip setuptools wheel
+python -m pip install -q -r requirements.txt cython_bbox pycocotools
+python -m pip install -q faiss-gpu || python -m pip install -q faiss-cpu || true
 python setup.py develop --quiet
 
 # ── 2. Install torchreid (deep-person-reid) ───────────────────────────────────
 echo "[3/6] Installing torchreid..."
 cd "$REPO_ROOT/deep-person-reid"
-pip install -q -r requirements.txt
+python -m pip install -q -r requirements.txt
 python setup.py develop --quiet
 
 # ── 3. Install tracking requirements ─────────────────────────────────────────
 echo "[4/6] Installing tracking requirements..."
 cd "$REPO_ROOT"
-pip install -q -r tracking/requirements.txt
+python -m pip install -q -r tracking/requirements.txt
+python - <<'PY'
+from loguru import logger
+from thop import profile
+from yolox.exp import get_exp
+from tracker.bot_sort import BoTSORT
+print("Dependency imports OK")
+PY
 
 # ── 4. Download OSNet Re-ID model ─────────────────────────────────────────────
 # osnet_ms_m_c.pth.tar — OSNet trained on multiple datasets (torchreid model zoo)
 echo "[5/6] Downloading OSNet Re-ID model..."
 OSNET_PATH="$REPO_ROOT/deep-person-reid/checkpoints/osnet_ms_m_c.pth.tar"
 if [ ! -f "$OSNET_PATH" ]; then
-    pip install -q gdown
+    python -m pip install -q gdown
     # Google Drive file ID for osnet_ms_m_c.pth.tar from KaiyangZhou/deep-person-reid
     gdown --id 1IosIFlLiulGIjwW3H8uMCC3YvMyr9gZ2 -O "$OSNET_PATH"
     echo "  OSNet saved to: $OSNET_PATH"
