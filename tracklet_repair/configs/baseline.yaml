@@ -1,0 +1,16 @@
+# Baseline analysis configuration.
+# Update these paths when real tracker outputs are available.
+
+project:
+  name: "Tracklet Repair and Conservative Merging"
+  random_seed: 42
+
+data:
+  tracker_output_path: "data/baseline_tracks.csv"
+  ground_truth_path: "data/ground_truth.csv"
+  output_dir: "results/analysis"
+
+analysis:
+  min_tracklet_length: 3
+  max_gap_for_fragment_report: 30
+  save_plots: true

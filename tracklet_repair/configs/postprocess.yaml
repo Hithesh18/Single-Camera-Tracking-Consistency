@@ -1,0 +1,23 @@
+# Post-processing configuration for tracklet repair and conservative merging.
+# These values are placeholders and should be tuned after baseline analysis.
+
+data:
+  input_tracks_path: "data/baseline_tracks.csv"
+  output_tracks_path: "results/postprocess/repaired_tracks.csv"
+
+repair:
+  enabled: true
+  max_gap_frames: 10
+  max_center_distance: 80.0
+  min_confidence: 0.3
+
+merge:
+  enabled: true
+  max_temporal_gap: 20
+  max_spatial_distance: 120.0
+  min_similarity_score: 0.85
+  conservative_mode: true
+
+logging:
+  output_dir: "results/postprocess"
+  save_decision_log: true
