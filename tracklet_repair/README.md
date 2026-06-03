@@ -112,6 +112,14 @@ Convert a BoT-SORT single-camera JSON file to tracking text:
 python -m tracklet_repair.src.utils.convert_json_to_tracks --input tracklet_repair/examples/sample_single_camera.json --output tracklet_repair/results/converted/sample_single_camera_tracks.txt
 ```
 
+## JSON pipeline helper
+
+Run conversion, repair, and comparison for one single-camera JSON file:
+
+```bash
+python -m tracklet_repair.src.pipeline.run_json_tracklet_pipeline --input-json tracklet_repair/examples/sample_single_camera.json --output-dir tracklet_repair/results/json_pipeline/sample_single_camera --max-gap 5 --enable-merge --max-merge-gap 5 --max-center-distance 80 --max-size-ratio 1.5 --short-threshold 10
+```
+
 Run the post-processing placeholder:
 
 ```bash
