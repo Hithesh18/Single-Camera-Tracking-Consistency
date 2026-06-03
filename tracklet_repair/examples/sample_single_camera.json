@@ -1,0 +1,71 @@
+{
+  "1": [
+    {
+      "object type": "Person",
+      "object sc id": 3,
+      "3d location": [0.0, 0.0, 0.0],
+      "3d bounding box scale": [0.6, 0.5, 1.8],
+      "3d bounding box rotation": [0.0, 0.0, 0.0],
+      "2d bounding box visible": {
+        "Camera_01": [100, 210, 150, 300]
+      }
+    },
+    {
+      "object type": "Forklift",
+      "object sc id": 20,
+      "2d bounding box visible": {
+        "Camera_01": [500, 180, 620, 320]
+      }
+    }
+  ],
+  "2": [
+    {
+      "object type": "Person",
+      "object sc id": 3,
+      "2d bounding box visible": {
+        "Camera_01": [104, 211, 154, 301]
+      }
+    },
+    {
+      "object type": "Person",
+      "object sc id": 7,
+      "2d bounding box visible": {
+        "Camera_01": [260, 220, 310, 305]
+      }
+    }
+  ],
+  "3": [
+    {
+      "object type": "Person",
+      "object sc id": 7,
+      "2d bounding box visible": {
+        "Camera_01": [264, 221, 314, 306]
+      }
+    }
+  ],
+  "4": [
+    {
+      "object type": "Person",
+      "object sc id": 8,
+      "2d bounding box visible": {
+        "Camera_01": [270, 222, 320, 307]
+      }
+    }
+  ],
+  "5": [
+    {
+      "object type": "Person",
+      "object sc id": 3,
+      "2d bounding box visible": {
+        "Camera_01": [116, 214, 166, 304]
+      }
+    },
+    {
+      "object type": "Person",
+      "object sc id": 8,
+      "2d bounding box visible": {
+        "Camera_01": [274, 223, 324, 308]
+      }
+    }
+  ]
+}

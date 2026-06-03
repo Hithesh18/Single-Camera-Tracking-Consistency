@@ -100,6 +100,12 @@ Run the analysis placeholder:
 bash scripts/run_analysis.sh
 ```
 
+Analyze a BoT-SORT single-camera JSON file from the repository root:
+
+```bash
+python -m tracklet_repair.src.analysis.analyze_single_camera_json --input tracklet_repair/examples/sample_single_camera.json --output tracklet_repair/results/analysis/sample_single_camera_stats.json
+```
+
 Run the post-processing placeholder:
 
 ```bash
