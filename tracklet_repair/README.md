@@ -148,6 +148,9 @@ The scripts currently use the example paths defined in the config files. Update
 the paths in `configs/baseline.yaml` and `configs/postprocess.yaml` once real
 tracking data is available.
 
+See [docs/reproducibility.md](docs/reproducibility.md) for repeatable synthetic
+and local real-data commands.
+
 ## Current Status
 
 This is a clean scaffold only. The next implementation steps are:
