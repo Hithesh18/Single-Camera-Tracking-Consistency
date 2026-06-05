@@ -57,6 +57,7 @@ tensorboard_logs/
 Thumbs.db
 
 # Tracklet repair helper outputs
+tracklet_repair/local_inputs/
 tracklet_repair/results/**/*.csv
 tracklet_repair/results/**/*.json
 tracklet_repair/results/**/*.txt

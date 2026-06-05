@@ -16,8 +16,8 @@ This project currently provides a lightweight post-processing pipeline for
 single-camera tracking outputs, starting with tracklet analysis, short-gap
 interpolation, conservative merging, and a baseline vs repaired comparison.
 
-The implemented result is verified on a synthetic sample. No improvement on real
-tracking data is claimed yet.
+The pipeline has been checked on synthetic samples and two local real
+single-camera outputs. Full ground-truth MOT evaluation has not been completed.
 
 ## Main Questions
 
@@ -33,14 +33,15 @@ tracking data is claimed yet.
 - Short-gap interpolation.
 - Conservative tracklet merging.
 - Baseline vs repaired comparison script.
+- Real raw `Camera.json` tested.
+- Real `fixed_Camera.json` tested.
+- Generated real-data results kept local and ignored.
 
 ## Planned Next Steps
 
-1. Integrate real BoT-SORT output or project dataset.
-2. Run the full pipeline on real tracking files.
-3. Add visual failure-case examples.
-4. Optionally add TrackEval/MOT metrics if ground truth is available.
-5. Prepare final result tables for paper and presentation.
+1. Add visual failure-case examples.
+2. Optionally add TrackEval/MOT metrics if ground truth is available.
+3. Prepare final result tables for paper and presentation.
 
 ## Risks
 
