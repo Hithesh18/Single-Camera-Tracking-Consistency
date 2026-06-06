@@ -43,6 +43,8 @@ available.
 | First real pair | Fixed | 0 -> 0 | 6 -> 6 | stable | 0 -> 0 |
 | Camera_02, first 1000 frames | Raw | 53 -> 14 | 44 -> 40 | 10.50 -> 33.50 | 22 -> 17 |
 | Camera_02, first 1000 frames | Fixed | 0 -> 0 | 17 -> 17 | 311.00 -> 311.00 | 0 -> 0 |
+| Camera_03, first 1000 frames | Raw | 46 -> 17 | 40 -> 36 | 19.50 -> 27.50 | 15 -> 11 |
+| Camera_03, first 1000 frames | Fixed | 0 -> 0 | 20 -> 20 | 83.00 -> 83.00 | 0 -> 0 |
 
 For the Camera_02 run, 9000 frames were extracted from the video, but only the
 first 1000 were processed. Detection used the ByteTrack/MOT17 fallback
@@ -52,6 +54,13 @@ checkpoint was unavailable.
 On the raw Camera_02 output, the helper interpolated 75 detections and merged
 four conservative tracklet pairs. The fixed output remained unchanged because
 it already had no internal gaps or short tracklets.
+
+The Camera_03 run used the same first-1000-frame setup and fallback detector.
+Detection and OSNet x1_0 ReID extraction produced 4556 outputs. On the raw
+tracking output, the helper interpolated 76 detections and conservatively
+merged four fragmented tracklet pairs. Internal gaps decreased from 46 to 17,
+tracklets with gaps decreased from 21 to 12, and median tracklet length
+increased from 19.50 to 27.50. The fixed output was unchanged.
 
 ## One-minute speaking script
 
@@ -65,18 +74,20 @@ fragments that are close in time and position with similar box sizes.
 On the first real raw output, internal gaps decreased from 6 to 2 and median
 tracklet length increased from 8 to 17.5. On the Camera_02 1000-frame run,
 internal gaps decreased from 53 to 14, median length increased from 10.5 to
-33.5, and short tracklets decreased from 22 to 17. The helper made no changes
-to either fixed output because those tracklets were already stable. This
-suggests that the method repairs visible raw fragmentation without
-over-modifying stable results. These are tracklet-level results; full MOT
-metrics remain future work.
+33.5, and short tracklets decreased from 22 to 17. Camera_03 showed the same
+pattern: internal gaps decreased from 46 to 17 and median length increased from
+19.5 to 27.5. The helper made no changes to the fixed outputs because those
+tracklets were already stable. This suggests that the method repairs visible
+raw fragmentation without over-modifying stable results. These are
+tracklet-level results; full MOT metrics remain future work.
 
 ## Limitations
 
 - The current evaluation is tracklet-level, not a full MOT evaluation.
 - IDF1, HOTA, and MOTA have not yet been measured.
 - Ground truth and TrackEval integration are required for full MOT metrics.
-- The Camera_02 run used a fallback detector, not the final AIC25 detector.
+- The Camera_02 and Camera_03 runs used a fallback detector, not the final
+  AIC25 detector.
 
 ## Future work
 

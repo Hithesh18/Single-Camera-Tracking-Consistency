@@ -45,6 +45,10 @@ available.
 | raw Camera_02.json repaired | 5300 | 40 | 132.50 | 11 | 14 | after helper |
 | fixed_Camera_02.json baseline | 4952 | 17 | 291.29 | 0 | 0 | before helper |
 | fixed_Camera_02.json repaired | 4952 | 17 | 291.29 | 0 | 0 | after helper |
+| raw Camera_03.json baseline | 3844 | 40 | 96.10 | 21 | 46 | before helper |
+| raw Camera_03.json repaired | 3920 | 36 | 108.89 | 12 | 17 | after helper |
+| fixed_Camera_03.json baseline | 3961 | 20 | 198.05 | 0 | 0 | before helper |
+| fixed_Camera_03.json repaired | 3961 | 20 | 198.05 | 0 | 0 | after helper |
 
 For the raw output, the helper added 13 interpolated detections and performed
 one conservative merge with merge map `{7: 6}`. It made no additional changes
@@ -64,6 +68,20 @@ median tracklet length increased from 10.50 to 33.50, and short tracklets
 decreased from 22 to 17. The fixed output was unchanged. This run supports
 reproducibility and robustness, but it is not the final AIC25 detector result.
 
+The Camera_03 Colab run also used the first 1000 frames and the same fallback
+detector with OSNet x1_0 ReID extraction. Detection and ReID each produced 4556
+outputs. BoT-SORT produced 3844 tracked objects across 40 track IDs and 976
+frames, while `single_camera_fix.py` produced 3961 objects across 20 track IDs
+and 999 frames.
+
+On the raw Camera_03 output, the helper added 76 interpolated detections and
+performed four conservative merges with merge map
+`{9: 7, 10: 7, 25: 23, 32: 31}`. Internal gaps decreased from 46 to 17,
+tracklets with gaps decreased from 21 to 12, median tracklet length increased
+from 19.50 to 27.50, and short tracklets decreased from 15 to 11. The fixed
+output was unchanged. This is another robustness result with the fallback
+detector, not the final AIC25 detector result.
+
 ## Presentation points
 
 - We target local gaps and identity fragmentation before global multi-camera
@@ -72,7 +90,7 @@ reproducibility and robustness, but it is not the final AIC25 detector result.
   tracklet statistics.
 - Repair is conservative because incorrect identity merges are more harmful
   than missed merges.
-- Across two real raw/fixed pairs, the helper reduced raw fragmentation while
+- Across three real raw/fixed pairs, the helper reduced raw fragmentation while
   leaving already stable fixed outputs unchanged.
 - Future work is broader real-data testing, visual examples, and ground-truth
   MOT evaluation.
@@ -80,8 +98,8 @@ reproducibility and robustness, but it is not the final AIC25 detector result.
 ## Limitations
 
 - The current result is tracklet-level analysis, not full MOT evaluation.
-- Only two real raw/fixed output pairs have been tested so far, and Camera_02
-  used a fallback detector on the first 1000 frames.
+- Only three real raw/fixed output pairs have been tested so far. Camera_02 and
+  Camera_03 used a fallback detector on the first 1000 frames.
 - IDF1, HOTA, MOTA, and identity-switch metrics require ground truth and
   TrackEval integration.
 - Results from more cameras and scenes would make the experiment stronger.
