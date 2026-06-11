@@ -144,3 +144,49 @@ The synthetic fragmented sample shows that the repair pipeline can reduce the
 number of tracklets and increase mean tracklet length. The added detections come
 from interpolation. This is still a synthetic sanity check, not a real-data
 result.
+
+## Tracklet Repair Ablation
+
+Added a JSON ablation runner to compare the existing repair components on the
+same input. This supports the final report by separating the effects of
+interpolation only, conservative merging only, and the full repair pipeline.
+
+Files added:
+
+- `tracklet_repair/src/evaluation/run_ablation.py`
+- `tracklet_repair/tests/test_ablation.py`
+
+Test command:
+
+```bash
+python -m pytest tracklet_repair/tests -v
+```
+
+Test result: 14 tests passed.
+
+Example command:
+
+```bash
+python -m tracklet_repair.src.evaluation.run_ablation --input-json tracklet_repair/examples/sample_single_camera.json --output-dir tracklet_repair/results/ablation/sample_single_camera --max-gap 5 --max-merge-gap 5 --max-center-distance 80 --max-size-ratio 1.5 --short-threshold 10
+```
+
+Example result:
+
+- baseline: 8 detections, 4 tracklets, 1 internal gap
+- interpolation only: 10 detections, 4 tracklets, 0 internal gaps
+- merge only: 8 detections, 3 tracklets, 1 internal gap
+- full repair: 10 detections, 3 tracklets, 0 internal gaps
+
+Generated outputs:
+
+- `baseline_tracks.txt`
+- `interpolation_only_tracks.txt`
+- `merge_only_tracks.txt`
+- `full_repair_tracks.txt`
+- `ablation.json`
+- `ablation.md`
+
+The comparison uses tracklet-level statistics only. It does not add ReID
+matching or claim IDF1, HOTA, or MOTA improvements. Merge quality still depends
+on the existing geometric thresholds. The consolidated table can later be used
+as an ablation table in the final report.
