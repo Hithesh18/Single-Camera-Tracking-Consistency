@@ -190,3 +190,79 @@ The comparison uses tracklet-level statistics only. It does not add ReID
 matching or claim IDF1, HOTA, or MOTA improvements. Merge quality still depends
 on the existing geometric thresholds. The consolidated table can later be used
 as an ablation table in the final report.
+
+## Real-Data Tracklet Repair Ablation
+
+The four-way ablation was run at commit `6988fd5` on three raw single-camera
+outputs and their corresponding fixed-output controls. Every run used the same
+parameters: `max_gap=5`, `max_merge_gap=5`, `max_center_distance=80`,
+`max_size_ratio=1.5`, and `short_threshold=10`.
+
+Commands:
+
+```bash
+python -m tracklet_repair.src.evaluation.run_ablation --input-json tracklet_repair/local_inputs/Camera.json --output-dir tracklet_repair/results/ablation/Camera_raw --max-gap 5 --max-merge-gap 5 --max-center-distance 80 --max-size-ratio 1.5 --short-threshold 10
+
+python -m tracklet_repair.src.evaluation.run_ablation --input-json tracklet_repair/local_inputs/fixed_Camera.json --output-dir tracklet_repair/results/ablation/Camera_fixed --max-gap 5 --max-merge-gap 5 --max-center-distance 80 --max-size-ratio 1.5 --short-threshold 10
+
+python -m tracklet_repair.src.evaluation.run_ablation --input-json tracklet_repair/local_inputs/Camera_02_1000/Camera_02.json --output-dir tracklet_repair/results/ablation/Camera_02_raw_1000 --max-gap 5 --max-merge-gap 5 --max-center-distance 80 --max-size-ratio 1.5 --short-threshold 10
+
+python -m tracklet_repair.src.evaluation.run_ablation --input-json tracklet_repair/local_inputs/Camera_02_1000/fixed_Camera_02.json --output-dir tracklet_repair/results/ablation/Camera_02_fixed_1000 --max-gap 5 --max-merge-gap 5 --max-center-distance 80 --max-size-ratio 1.5 --short-threshold 10
+
+python -m tracklet_repair.src.evaluation.run_ablation --input-json tracklet_repair/local_inputs/Camera_03_1000/Camera_03.json --output-dir tracklet_repair/results/ablation/Camera_03_raw_1000 --max-gap 5 --max-merge-gap 5 --max-center-distance 80 --max-size-ratio 1.5 --short-threshold 10
+
+python -m tracklet_repair.src.evaluation.run_ablation --input-json tracklet_repair/local_inputs/Camera_03_1000/fixed_Camera_03.json --output-dir tracklet_repair/results/ablation/Camera_03_fixed_1000 --max-gap 5 --max-merge-gap 5 --max-center-distance 80 --max-size-ratio 1.5 --short-threshold 10
+```
+
+Results:
+
+| Input | Variant | Detections | Tracklets | Mean length | Median length | Short | Gap tracks | Internal gaps | Interpolated | Merged |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Camera raw | baseline | 467 | 13 | 35.92 | 8.00 | 7 | 3 | 6 | 0 | 0 |
+| Camera raw | interpolation only | 477 | 13 | 36.69 | 8.00 | 7 | 1 | 2 | 10 | 0 |
+| Camera raw | merge only | 467 | 12 | 38.92 | 17.50 | 6 | 4 | 7 | 0 | 1 |
+| Camera raw | full repair | 480 | 12 | 40.00 | 17.50 | 6 | 1 | 2 | 13 | 1 |
+| Camera fixed | baseline | 486 | 6 | 81.00 | 92.50 | 0 | 0 | 0 | 0 | 0 |
+| Camera fixed | interpolation only | 486 | 6 | 81.00 | 92.50 | 0 | 0 | 0 | 0 | 0 |
+| Camera fixed | merge only | 486 | 6 | 81.00 | 92.50 | 0 | 0 | 0 | 0 | 0 |
+| Camera fixed | full repair | 486 | 6 | 81.00 | 92.50 | 0 | 0 | 0 | 0 | 0 |
+| Camera 02 raw, 1000 frames | baseline | 5225 | 44 | 118.75 | 10.50 | 22 | 15 | 53 | 0 | 0 |
+| Camera 02 raw, 1000 frames | interpolation only | 5296 | 44 | 120.36 | 11.00 | 21 | 11 | 14 | 71 | 0 |
+| Camera 02 raw, 1000 frames | merge only | 5225 | 40 | 130.62 | 32.00 | 18 | 17 | 57 | 0 | 4 |
+| Camera 02 raw, 1000 frames | full repair | 5300 | 40 | 132.50 | 33.50 | 17 | 11 | 14 | 75 | 4 |
+| Camera 02 fixed, 1000 frames | baseline | 4952 | 17 | 291.29 | 311.00 | 0 | 0 | 0 | 0 | 0 |
+| Camera 02 fixed, 1000 frames | interpolation only | 4952 | 17 | 291.29 | 311.00 | 0 | 0 | 0 | 0 | 0 |
+| Camera 02 fixed, 1000 frames | merge only | 4952 | 17 | 291.29 | 311.00 | 0 | 0 | 0 | 0 | 0 |
+| Camera 02 fixed, 1000 frames | full repair | 4952 | 17 | 291.29 | 311.00 | 0 | 0 | 0 | 0 | 0 |
+| Camera 03 raw, 1000-frame range | baseline | 3844 | 40 | 96.10 | 19.50 | 15 | 21 | 46 | 0 | 0 |
+| Camera 03 raw, 1000-frame range | interpolation only | 3913 | 40 | 97.83 | 21.50 | 15 | 12 | 17 | 69 | 0 |
+| Camera 03 raw, 1000-frame range | merge only | 3844 | 36 | 106.78 | 24.00 | 11 | 22 | 50 | 0 | 4 |
+| Camera 03 raw, 1000-frame range | full repair | 3920 | 36 | 108.89 | 27.50 | 11 | 12 | 17 | 76 | 4 |
+| Camera 03 fixed, 1000-frame range | baseline | 3961 | 20 | 198.05 | 83.00 | 0 | 0 | 0 | 0 | 0 |
+| Camera 03 fixed, 1000-frame range | interpolation only | 3961 | 20 | 198.05 | 83.00 | 0 | 0 | 0 | 0 | 0 |
+| Camera 03 fixed, 1000-frame range | merge only | 3961 | 20 | 198.05 | 83.00 | 0 | 0 | 0 | 0 | 0 |
+| Camera 03 fixed, 1000-frame range | full repair | 3961 | 20 | 198.05 | 83.00 | 0 | 0 | 0 | 0 | 0 |
+
+Each output directory contains:
+
+- `baseline_tracks.txt`
+- `interpolation_only_tracks.txt`
+- `merge_only_tracks.txt`
+- `full_repair_tracks.txt`
+- `ablation.json`
+- `ablation.md`
+
+On all three raw outputs, interpolation reduced internal gaps while preserving
+the number of tracklets. Conservative merging reduced the tracklet count, but
+the newly joined trajectories contained gaps until interpolation was applied.
+The full repair variant combined both effects and was less fragmented than the
+baseline: it reduced tracklet count, short tracklets, gap-track counts, and
+internal gaps. All fixed-output controls remained unchanged across all four
+variants, which is consistent with conservative behavior on already stable
+tracks.
+
+These are tracklet-level statistics only. There is no ground-truth IDF1, HOTA,
+MOTA, or identity-switch claim, and the ablation does not use ReID or global
+matching. Merge quality still depends on geometric thresholds, and the same
+thresholds were used for every sequence. These results can support the
+real-data ablation table in the final report.
