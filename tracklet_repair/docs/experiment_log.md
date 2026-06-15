@@ -266,3 +266,43 @@ MOTA, or identity-switch claim, and the ablation does not use ReID or global
 matching. Merge quality still depends on geometric thresholds, and the same
 thresholds were used for every sequence. These results can support the
 real-data ablation table in the final report.
+
+## Camera_04 Colab Ablation
+
+The four-way ablation was also run on the first 1000 video frames from
+`Warehouse_016/Camera_04`. The input was a BoT-SORT/AIC-style single-camera
+JSON output. The run used the same parameters as the earlier real-data
+experiments: `max_gap=5`, `max_merge_gap=5`, `max_center_distance=80`,
+`max_size_ratio=1.5`, and `short_threshold=10`.
+
+Raw output results:
+
+| Variant | Detections | Tracklets | Mean length | Median length | Short | Short (%) | Gap tracks | Internal gaps | Interpolated | Merged |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| baseline | 1154 | 21 | 54.95 | 11 | 10 | 47.62 | 6 | 28 | 0 | 0 |
+| interpolation only | 1188 | 21 | 56.57 | 11 | 10 | 47.62 | 5 | 11 | 34 | 0 |
+| merge only | 1154 | 17 | 67.88 | 12 | 6 | 35.29 | 8 | 32 | 0 | 4 |
+| full repair | 1194 | 17 | 70.24 | 12 | 6 | 35.29 | 5 | 11 | 40 | 4 |
+
+For the fixed-output control, all four variants were unchanged:
+
+- total detections: 1231
+- tracklets: 7
+- mean tracklet length: 175.86
+- median tracklet length: 166
+- short tracklets: 0
+- internal gaps: 0
+- interpolated detections: 0
+- merged tracklets: 0
+
+On the raw output, full repair reduced the number of tracklets from 21 to 17
+and internal gaps from 28 to 11. It added 40 interpolated detections and
+accepted four conservative merges. Merge-only increased internal gaps from 28
+to 32 because joining separate fragments made the missing frames between them
+part of one longer component. Full repair applies merging first and then fills
+eligible short gaps with interpolation. The unchanged fixed control is
+consistent with conservative behavior on an already stable output.
+
+This is a tracklet-level continuity evaluation and does not prove identity
+correctness. No IDF1, HOTA, MOTA, ReID, or global matching improvement is
+claimed.
