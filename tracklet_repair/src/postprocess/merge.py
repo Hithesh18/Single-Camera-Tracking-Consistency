@@ -28,21 +28,22 @@ def conservative_merge_tracklets(
     validate_tracking_dataframe(merged)
 
     summaries = _tracklet_summaries(merged)
+    components = {int(summary["track_id"]): summary for summary in summaries}
     merge_map: dict[int, int] = {}
 
     for target in sorted(summaries, key=lambda item: (item["start_frame"], item["track_id"])):
         target_id = int(target["track_id"])
-        if target_id in merge_map:
+        if target_id not in components:
             continue
 
+        current_target = components[target_id]
         candidates = []
-        for source in summaries:
-            source_id = int(source["track_id"])
+        for source_id, source in components.items():
             if source_id == target_id:
                 continue
             candidate = _build_candidate(
                 source,
-                target,
+                current_target,
                 max_merge_gap=max_merge_gap,
                 max_center_distance=max_center_distance,
                 max_size_ratio=max_size_ratio,
@@ -56,7 +57,13 @@ def conservative_merge_tracklets(
 
         candidates.sort(key=lambda item: (item["center_distance"], item["temporal_gap"]))
         best = candidates[0]
-        merge_map[target_id] = _resolve_track_id(best["source_id"], merge_map)
+        source_id = int(best["source_id"])
+        merge_map[target_id] = source_id
+        components[source_id] = _merge_summaries(
+            components[source_id],
+            current_target,
+        )
+        del components[target_id]
 
     if merge_map:
         merged["track_id"] = merged["track_id"].map(lambda track_id: merge_map.get(track_id, track_id))
@@ -80,6 +87,7 @@ def _tracklet_summaries(df: pd.DataFrame) -> list[dict]:
                 "first": first,
                 "last": last,
                 "class_id": int(first["class_id"]) if "class_id" in track.columns else None,
+                "frame_ids": set(track["frame_id"].astype(int)),
             }
         )
     return summaries
@@ -94,6 +102,9 @@ def _build_candidate(
     require_same_class: bool,
 ) -> dict | None:
     """Return a candidate merge if all conservative checks pass."""
+    if source["frame_ids"] & target["frame_ids"]:
+        return None
+
     temporal_gap = int(target["start_frame"] - source["end_frame"] - 1)
     if temporal_gap < 0 or temporal_gap > max_merge_gap:
         return None
@@ -118,6 +129,19 @@ def _build_candidate(
     }
 
 
+def _merge_summaries(source: dict, target: dict) -> dict:
+    """Update a source summary after accepting a later target component."""
+    return {
+        "track_id": int(source["track_id"]),
+        "start_frame": int(source["start_frame"]),
+        "end_frame": int(target["end_frame"]),
+        "first": source["first"],
+        "last": target["last"],
+        "class_id": source["class_id"],
+        "frame_ids": source["frame_ids"] | target["frame_ids"],
+    }
+
+
 def _center_distance(row_a: pd.Series, row_b: pd.Series) -> float:
     """Compute Euclidean distance between bounding-box centers."""
     center_a_x = row_a["x"] + row_a["width"] / 2
@@ -132,13 +156,6 @@ def _ratio(value_a: float, value_b: float) -> float:
     if value_a <= 0 or value_b <= 0:
         return float("inf")
     return float(max(value_a / value_b, value_b / value_a))
-
-
-def _resolve_track_id(track_id: int, merge_map: dict[int, int]) -> int:
-    """Resolve chained merges to the final kept track ID."""
-    while track_id in merge_map:
-        track_id = merge_map[track_id]
-    return int(track_id)
 
 
 def conservative_merge(tracks: pd.DataFrame, min_similarity_score: float) -> pd.DataFrame:

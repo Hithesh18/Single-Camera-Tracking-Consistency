@@ -179,4 +179,25 @@ def test_preserves_stable_tracks_and_sorts_output_deterministically() -> None:
     pd.testing.assert_frame_equal(first, second)
 
 
+def test_chained_merge_does_not_create_overlapping_final_tracklet() -> None:
+    tracks = _tracks(
+        _row(1, 10, 0.0),
+        _row(2, 10, 1.0),
+        _row(4, 11, 2.0),
+        _row(5, 11, 3.0),
+        _row(5, 12, 3.5),
+        _row(6, 12, 4.5),
+    )
+
+    merged, merge_map = conservative_merge_tracklets(
+        tracks,
+        max_merge_gap=2,
+        max_center_distance=10.0,
+    )
+
+    assert merge_map == {11: 10}
+    assert set(merged["track_id"]) == {10, 12}
+    assert not merged.duplicated(subset=["frame_id", "track_id"]).any()
+
+
 # TODO: Add ambiguity-margin tests if that merge rule is introduced later.
