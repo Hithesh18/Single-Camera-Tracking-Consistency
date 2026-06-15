@@ -306,3 +306,44 @@ consistent with conservative behavior on an already stable output.
 This is a tracklet-level continuity evaluation and does not prove identity
 correctness. No IDF1, HOTA, MOTA, ReID, or global matching improvement is
 claimed.
+
+## Camera_05 Colab Ablation
+
+The four-way ablation was run on the first 1000 video frames from
+`Warehouse_016/Camera_05`. The input was a BoT-SORT/AIC-style single-camera
+JSON output. The detector produced 2230 detections. The raw tracker output
+contained 1872 objects, 17 unique track IDs, and frame range 1..1000. The
+existing fixed output contained 2176 objects, 10 unique track IDs, and frame
+range 1..1000. The run used the same parameters as the earlier real-data
+experiments: `max_gap=5`, `max_merge_gap=5`, `max_center_distance=80`,
+`max_size_ratio=1.5`, and `short_threshold=10`.
+
+Raw output results:
+
+| Variant | Detections | Tracklets | Internal gaps | Interpolated | Merged |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| baseline | 1872 | 17 | 59 | 0 | 0 |
+| interpolation only | 1950 | 17 | 21 | 78 | 0 |
+| merge only | 1872 | 14 | 62 | 0 | 3 |
+| full repair | 1956 | 14 | 21 | 84 | 3 |
+
+For the fixed-output control, all four variants were unchanged:
+
+- total detections: 2176
+- tracklets: 10
+- internal gaps: 0
+- interpolated detections: 0
+- merged tracklets: 0
+
+On the raw output, full repair reduced the number of tracklets from 17 to 14
+and internal gaps from 59 to 21. It added 84 interpolated detections and
+accepted three conservative merges. Merge-only increased internal gaps from 59
+to 62 because joining separate fragments made the missing frames between them
+part of one longer component. Full repair applies merging first and then fills
+eligible short gaps with interpolation. The unchanged fixed control is
+consistent with conservative behavior on an already stable output. This follows
+the same pattern as the Camera_04 ablation.
+
+This is a tracklet-level continuity evaluation and does not prove identity
+correctness. No IDF1, HOTA, MOTA, ReID, or global matching improvement is
+claimed.
