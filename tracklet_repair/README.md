@@ -1,162 +1,147 @@
-# Tracklet Repair and Conservative Merging for More Stable Single-Camera Tracking
+# Tracklet Repair and Conservative Merging for Single-Camera Tracking Consistency
 
-This folder is a helper module for tracklet analysis, repair, and comparison
-inside the Single-Camera Tracking Consistency project. It is kept isolated from
-the main BoT-SORT and TrackEval pipeline while we test the post-processing
-steps.
+This module is part of the Deep Learning Lab project on multi-camera tracking.
+It contributes to Subproject 1 by analyzing and improving the stability of
+single-camera tracklets before later pipeline stages.
 
-This repository contains a starter project for a Deep Learning Lab topic on
-single-camera tracking consistency inside a multi-camera multi-target tracking
-pipeline.
+The module is a lightweight post-processing and evaluation helper. It reads
+existing tracker outputs, measures tracklet continuity, repairs short gaps, and
+conservatively joins compatible fragments. It does not train a ReID model and
+does not implement global multi-camera matching.
 
-The goal is to improve the stability of single-camera tracking outputs by
-analyzing fragmented tracklets, repairing short gaps, and conservatively merging
-tracklets that likely belong to the same target. This scaffold does not yet
-implement the full algorithms. It provides a clean structure, documented
-placeholder functions, and scripts for future experiments.
+## Implemented Functionality
 
-## Project Idea
+- Tracklet statistics for project-style JSON and MOT-style text inputs.
+- Linear interpolation of short internal frame gaps.
+- Conservative merging based on temporal gap, bounding-box distance, size
+  ratio, and object class when available.
+- An end-to-end JSON repair pipeline.
+- Four-way ablation comparison:
+  - `baseline`
+  - `interpolation_only`
+  - `merge_only`
+  - `full_repair`
+- Regression tests for interpolation, merging, ordering, and overlap safety.
+- Experiment logging for synthetic and real tracker outputs.
 
-Modern multi-camera tracking systems often depend on strong single-camera
-tracking results. When a tracker frequently switches IDs, loses objects for a
-few frames, or creates fragmented tracklets, the downstream multi-camera
-association step becomes harder.
+The full repair order is conservative merging followed by short-gap
+interpolation.
 
-This project focuses on a post-processing stage that runs after a baseline
-single-camera tracker:
-
-1. Analyze tracklets and detect fragmentation patterns.
-2. Repair short temporal gaps inside plausible trajectories.
-3. Conservatively merge tracklets only when evidence is strong.
-4. Evaluate whether the repaired output improves tracking consistency.
-
-## Repository Structure
+## Structure
 
 ```text
-.
-├── configs/              # YAML configuration files
-├── docs/                 # Planning notes and experiment logs
-├── paper/                # LaTeX paper skeleton
-├── results/              # Output directory for generated results
-├── scripts/              # Shell scripts for common commands
-├── src/                  # Python source code
-│   ├── analysis/         # Tracklet statistics and diagnostics
-│   ├── evaluation/       # Metric computation placeholders
-│   ├── postprocess/      # Repair and merge placeholders
-│   └── utils/            # Shared helpers
-├── README.md
-└── requirements.txt
+tracklet_repair/
+|-- configs/          Configuration examples
+|-- docs/             Method, experiment, and reproducibility notes
+|-- examples/         Small committed synthetic inputs
+|-- scripts/          Shell commands for common workflows
+|-- src/
+|   |-- analysis/     Tracklet statistics
+|   |-- evaluation/   Before/after comparison and ablation
+|   |-- pipeline/     End-to-end JSON helper
+|   |-- postprocess/  Interpolation and conservative merging
+|   `-- utils/        JSON adapters and tracking file I/O
+`-- tests/            Regression tests
 ```
+
+## Input Format
+
+The primary project input is a BoT-SORT/AIC-style single-camera JSON file.
+Frames are stored as JSON keys, and each frame maps to a list of tracked
+objects. Each usable object must provide:
+
+- a single-camera track ID, such as `object sc id` or `object_sc_id`;
+- a visible two-dimensional bounding box; and
+- optionally a score and object class.
+
+The JSON adapter handles the project-specific key variants and converts
+bounding boxes to the internal columns:
+
+```text
+frame_id, track_id, x, y, width, height, score, class_id
+```
+
+Missing scores and classes use neutral defaults. The module also accepts
+comma-separated tracking text with these eight columns and no header.
 
 ## Setup
 
-Create and activate a virtual environment:
+Run commands from the repository root:
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
+pip install -r tracklet_repair/requirements.txt
 ```
 
-On Windows PowerShell:
+The regression suite uses `pytest`, which must also be available in the active
+environment.
 
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-```
-
-Install dependencies:
+## Run Tests
 
 ```bash
-pip install -r requirements.txt
+python -m pytest tracklet_repair/tests -v
 ```
 
-## Expected Data Format
+## Run the JSON Pipeline
 
-The starter code assumes tracking files are stored as CSV files with one
-detection per row:
-
-```text
-frame,track_id,x,y,w,h,score,camera_id
-1,12,450.0,210.0,80.0,160.0,0.92,c001
-2,12,454.0,211.5,80.5,160.0,0.91,c001
-```
-
-Column meanings:
-
-- `frame`: Integer frame index.
-- `track_id`: Tracker-assigned identity inside one camera.
-- `x`, `y`, `w`, `h`: Bounding box top-left coordinate, width, and height.
-- `score`: Detector or tracker confidence.
-- `camera_id`: Camera name or numeric camera identifier.
-
-Future experiments may adapt this to MOTChallenge text files or project-specific
-multi-camera data.
-
-## How to Run
-
-Run the analysis placeholder:
+The pipeline converts one JSON output, computes baseline statistics, applies
+repair, and writes a before/after comparison:
 
 ```bash
-bash scripts/run_analysis.sh
+python -m tracklet_repair.src.pipeline.run_json_tracklet_pipeline \
+  --input-json tracklet_repair/examples/sample_single_camera.json \
+  --output-dir tracklet_repair/results/json_pipeline/sample_single_camera \
+  --max-gap 5 \
+  --enable-merge \
+  --max-merge-gap 5 \
+  --max-center-distance 80 \
+  --max-size-ratio 1.5 \
+  --short-threshold 10
 ```
 
-Analyze a BoT-SORT single-camera JSON file from the repository root:
+## Run the Ablation
+
+The ablation evaluates the same input with no repair, interpolation only,
+merging only, and the full repair order:
 
 ```bash
-python -m tracklet_repair.src.analysis.analyze_single_camera_json --input tracklet_repair/examples/sample_single_camera.json --output tracklet_repair/results/analysis/sample_single_camera_stats.json
+python -m tracklet_repair.src.evaluation.run_ablation \
+  --input-json tracklet_repair/examples/sample_single_camera.json \
+  --output-dir tracklet_repair/results/ablation_sample \
+  --max-gap 5 \
+  --max-merge-gap 5 \
+  --max-center-distance 80 \
+  --max-size-ratio 1.5 \
+  --short-threshold 10
 ```
 
-Convert a BoT-SORT single-camera JSON file to tracking text:
+The output directory contains one tracking text file per variant together with
+`ablation.json` and `ablation.md`.
 
-```bash
-python -m tracklet_repair.src.utils.convert_json_to_tracks --input tracklet_repair/examples/sample_single_camera.json --output tracklet_repair/results/converted/sample_single_camera_tracks.txt
-```
+## Real-Data Evaluation
 
-## JSON pipeline helper
+Real single-camera tracker outputs are kept locally under
+`tracklet_repair/local_inputs/`. Generated tables and tracking files are
+written under `tracklet_repair/results/`. Both locations are ignored by Git.
 
-Run conversion, repair, and comparison for one single-camera JSON file:
+Commands, parameters, and committed experiment summaries are recorded in
+[`docs/experiment_log.md`](docs/experiment_log.md). The documented real-data
+ablations use the same thresholds for every sequence:
 
-```bash
-python -m tracklet_repair.src.pipeline.run_json_tracklet_pipeline --input-json tracklet_repair/examples/sample_single_camera.json --output-dir tracklet_repair/results/json_pipeline/sample_single_camera --max-gap 5 --enable-merge --max-merge-gap 5 --max-center-distance 80 --max-size-ratio 1.5 --short-threshold 10
-```
+- maximum interpolation gap: 5 frames;
+- maximum merge gap: 5 frames;
+- maximum center distance: 80 pixels;
+- maximum width or height ratio: 1.5; and
+- short-tracklet threshold: 10 detections.
 
-Run the post-processing placeholder:
+See [`docs/reproducibility.md`](docs/reproducibility.md) for repeatable sample
+and local-data commands.
 
-```bash
-bash scripts/run_postprocess.sh
-```
+## Limitations
 
-Run short-gap interpolation on the sample tracks:
-
-```bash
-python -m src.postprocess.run_postprocess --input examples/sample_tracks.txt --output results/postprocess/sample_repaired.txt --max-gap 5
-```
-
-Run the evaluation placeholder:
-
-```bash
-bash scripts/run_evaluation.sh
-```
-
-Compare baseline and repaired sample outputs:
-
-```bash
-python -m src.evaluation.evaluate_tracking --baseline examples/sample_fragmented_tracks.txt --repaired results/postprocess/fragmented_repaired.txt --output-json results/evaluation/fragmented_comparison.json --output-md results/evaluation/fragmented_comparison.md --short-threshold 10
-```
-
-The scripts currently use the example paths defined in the config files. Update
-the paths in `configs/baseline.yaml` and `configs/postprocess.yaml` once real
-tracking data is available.
-
-See [docs/reproducibility.md](docs/reproducibility.md) for repeatable synthetic
-and local real-data commands.
-
-## Current Status
-
-This is a clean scaffold only. The next implementation steps are:
-
-- Add robust loading for real tracker output files.
-- Implement tracklet statistics and fragmentation diagnostics.
-- Add simple gap repair based on temporal and spatial constraints.
-- Add conservative merge rules.
-- Compare baseline and repaired results with standard tracking metrics.
+- The reported measurements are tracklet-level continuity statistics.
+- Fewer internal gaps, fewer tracklets, or longer tracklets do not prove that
+  every identity association is correct.
+- No IDF1, HOTA, MOTA, ReID, or global matching improvement is claimed without
+  suitable ground truth and full tracking evaluation.
+- Conservative geometric rules may miss valid merges when motion or
+  bounding-box changes are large.
