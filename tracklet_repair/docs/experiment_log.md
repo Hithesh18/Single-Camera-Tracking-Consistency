@@ -307,6 +307,40 @@ This is a tracklet-level continuity evaluation and does not prove identity
 correctness. No IDF1, HOTA, MOTA, ReID, or global matching improvement is
 claimed.
 
+## Selected Missing Camera Colab Ablations
+
+Additional four-way ablations were run on the first 1000 video frames from
+`Warehouse_016` for `Camera_01`, `Camera_06`, `Camera_07`, `Camera_08`,
+`Camera_09`, `Camera_10`, and `Camera_11`. The inputs were BoT-SORT/AIC-style
+single-camera JSON outputs. All runs used the same parameters as the earlier
+real-data experiments: `max_gap=5`, `max_merge_gap=5`,
+`max_center_distance=80`, `max_size_ratio=1.5`, and `short_threshold=10`.
+
+| Camera | Raw baseline tracklets | Raw baseline gaps | Full repair tracklets | Full repair gaps | Interpolated | Merged | Fixed baseline tracklets/gaps | Fixed full repair tracklets/gaps |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Camera_01 | 60 | 50 | 51 | 19 | 93 | 9 | 22 / 0 | 22 / 0 |
+| Camera_06 | 11 | 7 | 10 | 1 | 16 | 1 | 6 / 0 | 6 / 0 |
+| Camera_07 | 27 | 35 | 23 | 16 | 51 | 4 | 18 / 0 | 18 / 0 |
+| Camera_08 | 13 | 33 | 13 | 14 | 44 | 0 | 7 / 0 | 7 / 0 |
+| Camera_09 | 11 | 5 | 10 | 1 | 6 | 1 | 3 / 0 | 3 / 0 |
+| Camera_10 | 29 | 35 | 24 | 14 | 69 | 5 | 18 / 0 | 18 / 0 |
+| Camera_11 | 22 | 25 | 20 | 10 | 37 | 2 | 13 / 0 | 13 / 0 |
+
+Across all seven newly added cameras, full repair reduced internal gaps on raw
+tracking outputs. The number of tracklets was reduced on six of the seven
+cameras. `Camera_08` kept the same tracklet count but still reduced internal
+gaps from 33 to 14 through interpolation. Fixed-control outputs remained
+unchanged for all seven cameras and had zero internal gaps before and after
+repair. This supports the intended conservative behavior: the method acts on
+fragmented raw outputs while leaving already stable fixed outputs unchanged.
+These results extend the earlier `Camera_02`, `Camera_03`, `Camera_04`, and
+`Camera_05` pattern to most numbered cameras in `Warehouse_016`.
+
+This is a tracklet-level continuity evaluation and does not prove identity
+correctness. No IDF1, HOTA, MOTA, ReID, or global matching improvement is
+claimed. The evaluation uses the first 1000 frames per camera, not the full
+9000-frame sequence.
+
 ## Camera_05 Colab Ablation
 
 The four-way ablation was run on the first 1000 video frames from
