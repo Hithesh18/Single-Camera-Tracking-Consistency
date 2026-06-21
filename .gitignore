@@ -55,3 +55,12 @@ tensorboard_logs/
 # ── OS metadata ───────────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
+
+# Tracklet repair helper outputs
+tracklet_repair/local_inputs/
+tracklet_repair/results/**/*.csv
+tracklet_repair/results/**/*.json
+tracklet_repair/results/**/*.txt
+tracklet_repair/results/**/*.md
+tracklet_repair/results/**/*.png
+tracklet_repair/results/**/*.pdf
