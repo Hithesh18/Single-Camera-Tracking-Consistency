@@ -107,3 +107,63 @@ def test_runner_writes_tracks_and_tracklet_level_summaries(tmp_path) -> None:
     for unsupported_metric in ("idf1", "hota", "mota", "identity switch"):
         assert unsupported_metric not in json_text
         assert unsupported_metric not in markdown_text
+
+
+def test_runner_accepts_motion_aware_merge_mode(tmp_path) -> None:
+    input_json = tmp_path / "tracks.json"
+    output_dir = tmp_path / "motion_ablation"
+    _write_sample_json(input_json)
+
+    report = run_ablation(
+        input_json=input_json,
+        output_dir=output_dir,
+        max_gap=2,
+        max_merge_gap=3,
+        max_center_distance=20.0,
+        max_size_ratio=1.5,
+        short_threshold=3,
+        merge_mode="motion_aware",
+        velocity_window=2,
+        ambiguity_margin=0.05,
+        max_speed=20.0,
+    )
+
+    assert report["configuration"]["merge_mode"] == "motion_aware"
+    assert report["configuration"]["full_repair_order"] == [
+        "motion_aware_merge",
+        "interpolate_gaps",
+    ]
+    assert (output_dir / "ablation.json").exists()
+
+
+def test_runner_accepts_appearance_global_mode(tmp_path) -> None:
+    input_json = tmp_path / "tracks.json"
+    frames_dir = tmp_path / "frames"
+    frames_dir.mkdir()
+    output_dir = tmp_path / "appearance_ablation"
+    _write_sample_json(input_json)
+    from PIL import Image
+    import numpy as np
+
+    for frame_id in (1, 2, 5, 6):
+        Image.fromarray(np.full((20, 20, 3), (220, 20, 20), dtype=np.uint8)).save(
+            frames_dir / f"{frame_id:06d}.jpg"
+        )
+
+    report = run_ablation(
+        input_json=input_json,
+        output_dir=output_dir,
+        max_gap=2,
+        max_merge_gap=3,
+        max_center_distance=20.0,
+        max_size_ratio=1.5,
+        short_threshold=3,
+        merge_mode="appearance_global",
+        frames_dir=frames_dir,
+        max_global_merge_gap=3,
+        appearance_threshold=0.7,
+    )
+
+    assert report["configuration"]["merge_mode"] == "appearance_global"
+    assert report["variants"]["full_repair"]["merged_tracklets"] == 1
+    assert report["variants"]["full_repair"]["merge_diagnostics"]["safety_violations"] == 0

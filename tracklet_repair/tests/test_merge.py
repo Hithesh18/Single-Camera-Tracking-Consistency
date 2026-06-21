@@ -2,7 +2,11 @@
 
 import pandas as pd
 
-from tracklet_repair.src.postprocess.merge import conservative_merge_tracklets
+from tracklet_repair.src.postprocess.merge import (
+    conservative_merge_tracklets,
+    merge_tracklets,
+    motion_aware_merge_tracklets,
+)
 from tracklet_repair.src.utils.io import TRACK_COLUMNS
 
 
@@ -200,4 +204,125 @@ def test_chained_merge_does_not_create_overlapping_final_tracklet() -> None:
     assert not merged.duplicated(subset=["frame_id", "track_id"]).any()
 
 
-# TODO: Add ambiguity-margin tests if that merge rule is introduced later.
+def test_conservative_merge_mode_matches_existing_function() -> None:
+    tracks = _tracks(
+        _row(1, 10, 0.0),
+        _row(2, 10, 2.0),
+        _row(4, 11, 4.0),
+        _row(5, 11, 6.0),
+    )
+
+    expected_tracks, expected_map = conservative_merge_tracklets(
+        tracks,
+        max_merge_gap=1,
+        max_center_distance=10.0,
+    )
+    actual_tracks, actual_map = merge_tracklets(
+        tracks,
+        merge_mode="conservative",
+        max_merge_gap=1,
+        max_center_distance=10.0,
+    )
+
+    assert actual_map == expected_map
+    pd.testing.assert_frame_equal(actual_tracks, expected_tracks)
+
+
+def test_motion_aware_rejects_overlapping_frames() -> None:
+    tracks = _tracks(
+        _row(1, 10, 0.0),
+        _row(3, 10, 2.0),
+        _row(3, 11, 3.0),
+        _row(4, 11, 4.0),
+    )
+
+    merged, merge_map = motion_aware_merge_tracklets(tracks)
+
+    assert merge_map == {}
+    assert set(merged["track_id"]) == {10, 11}
+
+
+def test_motion_aware_rejects_class_mismatch() -> None:
+    tracks = _tracks(
+        _row(1, 10, 0.0, class_id=0),
+        _row(2, 10, 2.0, class_id=0),
+        _row(4, 11, 6.0, class_id=1),
+        _row(5, 11, 8.0, class_id=1),
+    )
+
+    merged, merge_map = motion_aware_merge_tracklets(tracks)
+
+    assert merge_map == {}
+    assert set(merged["track_id"]) == {10, 11}
+
+
+def test_motion_aware_skips_ambiguous_candidates() -> None:
+    tracks = _tracks(
+        _row(1, 10, 0.0),
+        _row(2, 10, 2.0),
+        _row(4, 11, 6.0),
+        _row(5, 11, 8.0),
+        _row(4, 12, 6.2),
+        _row(5, 12, 8.2),
+    )
+
+    _, conservative_map = conservative_merge_tracklets(
+        tracks,
+        max_merge_gap=2,
+        max_center_distance=10.0,
+    )
+    merged, merge_map = motion_aware_merge_tracklets(
+        tracks,
+        max_merge_gap=2,
+        max_center_distance=10.0,
+        ambiguity_margin=0.05,
+        max_speed=20.0,
+    )
+
+    assert len(conservative_map) == 1
+    assert merge_map == {}
+    assert set(merged["track_id"]) == {10, 11, 12}
+
+
+def test_motion_aware_uses_constant_velocity_prediction() -> None:
+    tracks = _tracks(
+        _row(1, 10, 0.0),
+        _row(2, 10, 10.0),
+        _row(4, 11, 30.0),
+        _row(5, 11, 40.0),
+    )
+
+    _, conservative_map = conservative_merge_tracklets(
+        tracks,
+        max_merge_gap=2,
+        max_center_distance=5.0,
+    )
+    merged, merge_map = motion_aware_merge_tracklets(
+        tracks,
+        max_merge_gap=2,
+        max_center_distance=5.0,
+        max_speed=20.0,
+    )
+
+    assert conservative_map == {}
+    assert merge_map == {11: 10}
+    assert set(merged["track_id"]) == {10}
+
+
+def test_motion_aware_rejects_impossible_jump() -> None:
+    tracks = _tracks(
+        _row(1, 10, 0.0),
+        _row(2, 10, 1.0),
+        _row(4, 11, 200.0),
+        _row(5, 11, 201.0),
+    )
+
+    merged, merge_map = motion_aware_merge_tracklets(
+        tracks,
+        max_merge_gap=2,
+        max_center_distance=500.0,
+        max_speed=20.0,
+    )
+
+    assert merge_map == {}
+    assert set(merged["track_id"]) == {10, 11}

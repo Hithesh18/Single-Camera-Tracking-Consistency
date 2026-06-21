@@ -11,7 +11,7 @@ from tracklet_repair.src.evaluation.evaluate_tracking import (
     compare_tracking_outputs,
     save_markdown_table,
 )
-from tracklet_repair.src.postprocess.merge import conservative_merge_tracklets
+from tracklet_repair.src.postprocess.merge import MERGE_MODES, merge_tracklets
 from tracklet_repair.src.postprocess.repair import interpolate_track_gaps
 from tracklet_repair.src.utils.io import save_tracking_file
 from tracklet_repair.src.utils.json_adapter import load_single_camera_json_as_dataframe
@@ -26,6 +26,11 @@ def run_pipeline(
     max_center_distance: float,
     max_size_ratio: float,
     short_threshold: int,
+    merge_mode: str = "conservative",
+    velocity_window: int = 3,
+    ambiguity_margin: float = 0.10,
+    max_speed: float = 80.0,
+    **merge_options,
 ) -> dict:
     """Run conversion, repair, and comparison for one single-camera JSON file."""
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -46,11 +51,16 @@ def run_pipeline(
     processed_tracks = baseline_tracks
     merge_map = {}
     if enable_merge:
-        processed_tracks, merge_map = conservative_merge_tracklets(
+        processed_tracks, merge_map = merge_tracklets(
             processed_tracks,
+            merge_mode=merge_mode,
             max_merge_gap=max_merge_gap,
             max_center_distance=max_center_distance,
             max_size_ratio=max_size_ratio,
+            velocity_window=velocity_window,
+            ambiguity_margin=ambiguity_margin,
+            max_speed=max_speed,
+            **merge_options,
         )
 
     repaired_tracks = interpolate_track_gaps(processed_tracks, max_gap=max_gap)
@@ -74,6 +84,7 @@ def run_pipeline(
         "interpolated_detections": interpolated_count,
         "merged_tracklets": len(merge_map),
         "merge_map": merge_map,
+        "merge_mode": merge_mode,
         "output_dir": str(output_dir),
     }
     _print_summary(summary)
@@ -161,6 +172,29 @@ def parse_args() -> argparse.Namespace:
         default=10,
         help="Tracklets with this many detections or fewer count as short.",
     )
+    parser.add_argument(
+        "--merge-mode",
+        choices=MERGE_MODES,
+        default="conservative",
+        help="Tracklet merge strategy. Existing conservative behavior is the default.",
+    )
+    parser.add_argument("--velocity-window", type=int, default=3)
+    parser.add_argument("--ambiguity-margin", type=float, default=0.10)
+    parser.add_argument("--max-speed", type=float, default=80.0)
+    parser.add_argument("--frames-dir", type=Path)
+    parser.add_argument("--frame-pattern", default="{frame_id:06d}.jpg")
+    parser.add_argument("--appearance-window", type=int, default=3)
+    parser.add_argument("--appearance-threshold", type=float, default=0.65)
+    parser.add_argument(
+        "--appearance-backend", choices=("hsv", "rgb", "combined"), default="combined"
+    )
+    parser.add_argument("--allow-geometry-fallback", action="store_true")
+    parser.add_argument("--max-global-merge-gap", type=int)
+    parser.add_argument("--appearance-weight", type=float, default=0.40)
+    parser.add_argument("--motion-weight", type=float, default=0.25)
+    parser.add_argument("--geometry-weight", type=float, default=0.15)
+    parser.add_argument("--temporal-weight", type=float, default=0.10)
+    parser.add_argument("--size-weight", type=float, default=0.10)
     return parser.parse_args()
 
 
@@ -176,6 +210,22 @@ def main() -> None:
         max_center_distance=args.max_center_distance,
         max_size_ratio=args.max_size_ratio,
         short_threshold=args.short_threshold,
+        merge_mode=args.merge_mode,
+        velocity_window=args.velocity_window,
+        ambiguity_margin=args.ambiguity_margin,
+        max_speed=args.max_speed,
+        frames_dir=args.frames_dir,
+        frame_pattern=args.frame_pattern,
+        appearance_window=args.appearance_window,
+        appearance_threshold=args.appearance_threshold,
+        appearance_backend=args.appearance_backend,
+        allow_geometry_fallback=args.allow_geometry_fallback,
+        max_global_merge_gap=args.max_global_merge_gap,
+        appearance_weight=args.appearance_weight,
+        motion_weight=args.motion_weight,
+        geometry_weight=args.geometry_weight,
+        temporal_weight=args.temporal_weight,
+        size_weight=args.size_weight,
     )
 
 
