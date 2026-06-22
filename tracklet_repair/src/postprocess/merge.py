@@ -9,7 +9,7 @@ import pandas as pd
 from tracklet_repair.src.utils.io import TRACK_COLUMNS, validate_tracking_dataframe
 
 
-MERGE_MODES = ("conservative", "motion_aware", "appearance_global")
+MERGE_MODES = ("conservative", "motion_aware", "appearance_global", "learned")
 
 
 def conservative_merge_tracklets(
@@ -97,9 +97,28 @@ def merge_tracklets(
     geometry_weight: float = 0.15,
     temporal_weight: float = 0.10,
     size_weight: float = 0.10,
+    matcher_path: str | None = None,
+    embed_dir: str | None = None,
+    prob_threshold: float = 0.5,
     return_diagnostics: bool = False,
 ) -> tuple:
     """Run the selected tracklet merge strategy."""
+    if merge_mode == "learned":
+        if not matcher_path or not embed_dir:
+            raise ValueError("learned merge requires matcher_path and embed_dir.")
+        from tracklet_repair.src.postprocess.learned_merge import learned_merge_tracklets
+
+        merged, merge_map, diagnostics = learned_merge_tracklets(
+            df,
+            matcher_path=matcher_path,
+            embed_dir=embed_dir,
+            prob_threshold=prob_threshold,
+            max_gap=None if max_global_merge_gap is None else max_global_merge_gap,
+            require_same_class=require_same_class,
+        )
+        if return_diagnostics:
+            return merged, merge_map, diagnostics
+        return merged, merge_map
     if merge_mode == "conservative":
         result = conservative_merge_tracklets(
             df,
