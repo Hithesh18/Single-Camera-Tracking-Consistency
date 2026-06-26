@@ -1,0 +1,35 @@
+{
+  "feature_names": [
+    "mean_appearance_cosine",
+    "endpoint_appearance_cosine",
+    "max_appearance_cosine",
+    "temporal_gap_norm",
+    "predicted_center_distance_norm",
+    "raw_center_distance_norm",
+    "size_ratio",
+    "same_class",
+    "velocity_direction_consistency"
+  ],
+  "mean": [
+    0.6801884174346924,
+    0.5934674739837646,
+    0.5975315570831299,
+    0.3592592477798462,
+    0.8667467832565308,
+    0.8002153038978577,
+    1.5072932243347168,
+    1.0,
+    0.11177444458007812
+  ],
+  "std": [
+    0.09206843376159668,
+    0.13713563978672028,
+    0.13192938268184662,
+    0.2381916493177414,
+    0.8106542229652405,
+    0.8500391244888306,
+    0.28067049384117126,
+    1.0,
+    0.30953216552734375
+  ]
+}
