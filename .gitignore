@@ -64,3 +64,6 @@ tracklet_repair/results/**/*.txt
 tracklet_repair/results/**/*.md
 tracklet_repair/results/**/*.png
 tracklet_repair/results/**/*.pdf
+tracklet_repair/models/
+tracklet_repair/results/
+results_local/
