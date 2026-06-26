@@ -115,6 +115,13 @@ class CrossSceneRunner:
                                 f"MTMC_Tracking_2025/{sp}/{scene}/calibration.json",
                                 f"MTMC_Tracking_2025/{sp}/{scene}/ground_truth.json"])
             src = f"{tmp}/MTMC_Tracking_2025/{sp}/{scene}"
+            if not os.path.isdir(f"{src}/videos"):
+                shutil.rmtree(tmp, ignore_errors=True)
+                raise RuntimeError(
+                    f"No files downloaded for '{scene}' in split '{self.dataset}'. "
+                    f"That scene probably isn't in this split on HuggingFace — "
+                    f"list available scenes with HfApi().list_repo_files('nvidia/PhysicalAI-SmartSpaces', "
+                    f"repo_type='dataset') and pick a TEST_SCENE that exists in '{self.dataset}'.")
             if not os.path.isdir(dv):
                 shutil.copytree(f"{src}/videos", dv)
             for fn in ("calibration.json", "ground_truth.json"):
