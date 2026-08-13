@@ -105,6 +105,10 @@ class CrossSceneRunner:
         os.makedirs(repo_scene, exist_ok=True)
         if not (os.path.isdir(dv) and os.listdir(dv)):
             assert self.hf_token, "Set hf_token (HF_TOKEN) before downloading."
+            assert isinstance(self.hf_token, str), (
+                f"hf_token must be a plain string, got {type(self.hf_token).__name__}. "
+                "Paste just the token itself, e.g. HF_TOKEN = 'hf_xxx...' — not a dict or object."
+            )
             login(token=self.hf_token)
             sp = self.dataset.lower()
             print(f"[{scene}] downloading videos + GT from HuggingFace...", flush=True)
