@@ -1,14 +1,10 @@
 """Join deep ReID embeddings to tracklets and build learned-matcher features.
 
-This is the "visual appearance" backbone the supervisor asked for: instead of
-geometric if/else rules, every candidate tracklet merge is described by a vector
-that is dominated by deep ReID appearance similarity (OSNet, 512-d), with motion
-and temporal cues alongside. A learned model (see model.py) maps this vector to
-P(same identity).
-
-Embeddings are matched to tracked detections exactly on (frame, x1, y1, x2, y2):
-the BoT-SORT output box equals the detection box, and the embedding filename
-encodes that box, so no fuzzy matching is needed.
+Each candidate tracklet merge is described by a vector dominated by OSNet
+(512-d) appearance similarity, plus motion/temporal cues; model.py maps this
+to P(same identity). Embeddings are matched to detections exactly on
+(frame, x1, y1, x2, y2) — the embedding filename encodes that box, so no
+fuzzy matching is needed.
 """
 
 from __future__ import annotations

@@ -1,16 +1,9 @@
 """Scene-level GT benchmark: raw vs tracklet_repair, aggregated over cameras.
 
-For every camera in a scene this:
-  1. loads the raw single-camera tracker JSON,
-  2. produces a repaired version with tracklet_repair (merge -> interpolate),
-  3. evaluates raw vs repaired against the ground truth (IDF1, MOTA, ID switches,
-     fragmentations, ...),
-  4. classifies the root cause of every internal gap in the raw output,
-and finally writes one aggregate report across all cameras.
-
-This is the headline experiment for Subproject 1: it shows, with ground truth,
-whether the repair step makes single-camera tracks more consistent, and explains
-why tracks break in the first place. CPU-only.
+For each camera: load the raw single-camera tracker JSON, repair it
+(merge -> interpolate), evaluate both against ground truth (IDF1, MOTA, ID
+switches, fragmentations), and classify the root cause of every internal gap.
+Writes one aggregate report across all cameras. CPU-only.
 """
 
 from __future__ import annotations

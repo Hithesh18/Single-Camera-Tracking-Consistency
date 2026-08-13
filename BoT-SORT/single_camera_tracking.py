@@ -50,15 +50,7 @@ FIXED_SCALES_BY_CLASS = {
 
 ###
 def run_botsort_tracking(frame_detections: OrderedDict, args, save_dir=None):
-
-    """
-    Run BoT-SORT tracker on loaded detection data.
-
-    Args:
-        frame_detections (OrderedDict): {frame_id: [list of detection dicts]}
-        args (argparse.Namespace): Arguments required by BoT-SORT
-        save_dir (str or Path): Optional output directory to save visualizations/results
-    """
+    """Run BoT-SORT on loaded detections ({frame_id: [detection dicts]})."""
     tracker = BoTSORT(args, frame_rate=args.fps)
     results = []
 

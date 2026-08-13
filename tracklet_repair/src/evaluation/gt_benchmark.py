@@ -1,18 +1,9 @@
 """Single-camera evaluation against ground truth + gap root-cause analysis.
 
-This module answers two supervisor requests directly:
-
-1. "Test against and compare with ground truth" — computes real MOT metrics
-   (IDF1, MOTA, ID switches, fragmentations, ...) for a baseline tracker output
-   and a repaired output, side by side, against the AIC25 ground truth.
-
-2. "Internal gaps — how is it coming?" — for every internal gap in the baseline
-   tracklets, classifies WHY the track broke (genuine occlusion/exit vs missed
-   detection vs low-confidence detection vs tracker association failure), using
-   the ground truth's per-camera visibility and the raw detection file.
-
-Everything here is CPU-only and runs on the existing single-camera JSON outputs,
-so it does not need a GPU or Colab.
+Computes MOT metrics (IDF1, MOTA, ID switches, fragmentations) for baseline vs
+repaired tracker output against the AIC25 ground truth, and classifies why each
+internal gap happened (occlusion/exit vs missed detection vs low confidence vs
+association failure). CPU-only, runs on existing single-camera JSONs.
 """
 
 from __future__ import annotations

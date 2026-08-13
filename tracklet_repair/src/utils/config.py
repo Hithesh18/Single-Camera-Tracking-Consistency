@@ -9,17 +9,7 @@ import yaml
 
 
 def load_config(config_path: Path) -> dict[str, Any]:
-    """Load a YAML configuration file.
-
-    Args:
-        config_path: Path to a YAML config file.
-
-    Returns:
-        The parsed configuration dictionary.
-
-    Raises:
-        FileNotFoundError: If the config file does not exist.
-    """
+    """Load a YAML config file into a dict."""
     if not config_path.exists():
         raise FileNotFoundError(f"Config file not found: {config_path}")
 

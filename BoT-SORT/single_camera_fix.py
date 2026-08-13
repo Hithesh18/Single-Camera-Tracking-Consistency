@@ -13,17 +13,10 @@ import time
 
 
 def get_final_new_id(old_id, merged):
-    """
-    Recursively find the final new_id for a given old_id by following the merge mapping.
-    This ensures that all references to old_id are replaced with the final new_id.
-    If the old_id is a value in merged, replace it with the most recent new_id.
-    """
-    # Iterate through the merged dictionary to check if any value is equal to old_id
+    """Follow the merge chain to the final id old_id was merged into."""
     for key, value in merged.items():
         if value == old_id:
-            # Update the merged dictionary to reflect the change in key-value pair
             merged[key] = merged.get(value, value)
-            # Recurse until we find the final new_id
             get_final_new_id(key, merged)
 
 def tracklets_non_maximum_suppression(data, fix_cfg, args):
