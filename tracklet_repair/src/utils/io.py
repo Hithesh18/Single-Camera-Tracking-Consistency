@@ -20,14 +20,7 @@ TRACK_COLUMNS = [
 
 
 def load_tracking_file(path: str) -> pd.DataFrame:
-    """Load a comma-separated tracking text file.
-
-    Args:
-        path: Path to a MOT-style text file without a header row.
-
-    Returns:
-        A sorted DataFrame with the expected tracking columns.
-    """
+    """Load a MOT-style tracking text file (no header row) into a sorted DataFrame."""
     file_path = Path(path)
     if not file_path.exists():
         raise FileNotFoundError(f"Tracking file not found: {file_path}")

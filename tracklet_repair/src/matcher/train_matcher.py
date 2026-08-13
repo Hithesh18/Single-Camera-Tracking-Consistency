@@ -1,17 +1,10 @@
 """Train the learned tracklet matcher on ground-truth-labelled pairs.
 
-Pipeline (CPU, runs locally on cached embeddings):
-  1. For each camera, load raw tracks + attach OSNet ReID embeddings.
-  2. Match every tracklet to a ground-truth object id (IoU vote).
-  3. Form ordered candidate pairs (source ends before target starts) and label
-     them 1 if the two tracklets share a GT id, else 0.
-  4. Build appearance+motion feature vectors and train a small MLP to predict
-     P(same identity) -- the learned replacement for the geometric if/else cost.
-
-Why this answers the supervisor: the decision is *learned* from data, the
-dominant signal is deep *visual appearance* (not box geometry, so it survives
-tilt), and pairs are formed with no temporal cap so the model can learn
-long-gap re-identification (object goes behind an obstacle and returns).
+For each camera: load raw tracks with OSNet embeddings, match tracklets to GT
+object ids by IoU vote, form ordered candidate pairs (source ends before
+target starts) labelled 1 if they share a GT id, and train a small MLP on
+appearance+motion features to predict P(same identity). No temporal cap on
+pairs, so it can learn long-gap re-identification. CPU-only.
 """
 
 from __future__ import annotations
