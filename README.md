@@ -22,7 +22,7 @@ There are three notebooks, each self-contained (clone + install + download + run
 
 | Notebook | What it does | Where |
 |---|---|---|
-| **[`AIC25_Pipeline.ipynb`](AIC25_Pipeline.ipynb)** | Main pipeline: detection → ReID → single-camera tracking → tracklet repair (Path A, 2 cameras by default), plus an optional heavier Path B for multi-camera + official 3D-HOTA. Start here. | Colab, T4 GPU |
+| **[`AIC25_Pipeline.ipynb`](AIC25_Pipeline.ipynb)** | Main pipeline: detection → ReID → single-camera tracking → tracklet-repair ablation (Path A, 2 cameras by default, no ground truth), plus an optional heavier Path B for multi-camera + official 3D-HOTA. Start here to confirm the pipeline runs. | Colab, T4 GPU |
 | **[`Tier2_HOTA.ipynb`](Tier2_HOTA.ipynb)** | Cross-scene generalization: trains the learned ReID tracklet matcher on one warehouse, tests it on a different unseen one (raw → conservative → learned, against ground truth). | Colab, T4 GPU |
 | **[`Local_CrossScene.ipynb`](Local_CrossScene.ipynb)** | Same cross-scene experiment as above, for a local machine with an NVIDIA GPU instead of Colab. | Local, NVIDIA GPU |
 
@@ -77,13 +77,23 @@ HuggingFace dataset (nvidia/PhysicalAI-SmartSpaces)
         │  → HOTA / DetA / AssA / LocA scores
 ```
 
-**Subproject 1 add-ons** (in [`tracklet_repair/`](tracklet_repair/README.md), run after step [4]):
+**Subproject 1's ground-truth result** (the one that matters for the report) lives in `Tier2_HOTA.ipynb` / `Local_CrossScene.ipynb`, not in `AIC25_Pipeline.ipynb` — it trains on one scene and evaluates on a held-out one:
 
-| Script | Purpose |
-|---|---|
-| `tracklet_repair/src/evaluation/benchmark_scene.py` | Scores raw vs repaired tracklets against `ground_truth.json` (IDF1, MOTA, ID switches) |
-| `tracklet_repair/src/matcher/train_matcher.py` | Trains a small MLP on GT-labelled tracklet pairs — the learned replacement for the geometric merge rule |
-| `tracklet_repair/src/evaluation/tune_botsort.py` | Sweeps BoT-SORT matching thresholds against ground truth |
+```text
+Single-camera JSONs (train scene)
+        ▼
+tracklet_repair/src/matcher/train_matcher.py     trains a small MLP on GT-labelled tracklet pairs
+        │  → tracklet_repair/models/<TrainScene>_matcher
+        ▼
+Single-camera JSONs (unseen test scene)
+        ▼
+tracklet_repair/src/evaluation/benchmark_scene.py   scores raw vs conservative (heuristic) vs learned
+        │  against ground_truth.json — IDF1, MOTA, ID switches, fragmentations
+        ▼
+   comparison table (raw / conservative / learned, per camera + aggregate)
+```
+
+`tracklet_repair/src/evaluation/tune_botsort.py` (BoT-SORT matching-threshold sweep against ground truth) is an optional add-on, also runnable from either notebook.
 
 See [`tracklet_repair/README.md`](tracklet_repair/README.md) for the module's own structure (`analysis/`, `evaluation/`, `postprocess/`, `matcher/`, `utils/`) and [`tracklet_repair/docs/`](tracklet_repair/docs/) for method notes and experiment logs.
 
