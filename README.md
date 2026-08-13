@@ -18,24 +18,23 @@
 
 ## Run it (Google Colab)
 
-There are three notebooks, each self-contained (clone + install + download + run — just open and run top to bottom):
+**[`Tier2_HOTA.ipynb`](Tier2_HOTA.ipynb) is the main notebook** — it produces the actual result for this project: a learned ReID tracklet matcher trained on one warehouse and tested on a different, unseen one (raw → conservative (heuristic) → learned, scored against ground truth: IDF1, MOTA, ID switches, fragmentations).
 
 | Notebook | What it does | Where |
 |---|---|---|
-| **[`AIC25_Pipeline.ipynb`](AIC25_Pipeline.ipynb)** | Main pipeline: detection → ReID → single-camera tracking → tracklet-repair ablation (Path A, 2 cameras by default, no ground truth), plus an optional heavier Path B for multi-camera + official 3D-HOTA. Start here to confirm the pipeline runs. | Colab, T4 GPU |
-| **[`Tier2_HOTA.ipynb`](Tier2_HOTA.ipynb)** | Cross-scene generalization: trains the learned ReID tracklet matcher on one warehouse, tests it on a different unseen one (raw → conservative → learned, against ground truth). | Colab, T4 GPU |
-| **[`Local_CrossScene.ipynb`](Local_CrossScene.ipynb)** | Same cross-scene experiment as above, for a local machine with an NVIDIA GPU instead of Colab. | Local, NVIDIA GPU |
+| **[`Tier2_HOTA.ipynb`](Tier2_HOTA.ipynb)** ⭐ | **Main result.** Cross-scene generalization: trains the matcher on `TRAIN_SCENE`, tests it on unseen `TEST_SCENE`. | Colab, T4 GPU |
+| [`Local_CrossScene.ipynb`](Local_CrossScene.ipynb) | Same cross-scene experiment, for a local machine with an NVIDIA GPU instead of Colab. | Local, NVIDIA GPU |
+| [`AIC25_Pipeline.ipynb`](AIC25_Pipeline.ipynb) | Secondary/optional: single-scene pipeline sanity check (no train/test split, no ground truth) + official 3D-HOTA score for a paper comparison. Not needed for the main result. | Colab, T4 GPU |
 
-To run any of them on Colab:
+To run `Tier2_HOTA.ipynb` on Colab:
 
-1. Open [Google Colab](https://colab.research.google.com/), then **File → Upload notebook** and pick the file (or open it straight from GitHub via **File → Open notebook → GitHub**).
+1. Open [Google Colab](https://colab.research.google.com/), then **File → Upload notebook** and pick `Tier2_HOTA.ipynb` (or open it straight from GitHub via **File → Open notebook → GitHub**).
 2. **Runtime → Change runtime type → T4 GPU.**
 3. Add a HuggingFace token as a Colab secret (key icon on the left panel): name `HF_TOKEN`, value from [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens). Accept the dataset terms once at [huggingface.co/datasets/nvidia/PhysicalAI-SmartSpaces](https://huggingface.co/datasets/nvidia/PhysicalAI-SmartSpaces).
-4. Run all cells top to bottom.
+4. In the **Configuration** cell, set `TRAIN_SCENE` / `TEST_SCENE` (must differ) and `CAMERAS` — defaults to 2 cameras (`Camera`, `Camera_01`) so a run fits in one session; the cell has `# <-- change this` comments marking what to edit. Widen `CAMERAS` (or set it to `None` for all 12) for fuller coverage.
+5. Run all cells top to bottom. Results (`comparison.md`, raw vs conservative vs learned per camera + aggregate) are cached to Google Drive.
 
-**`AIC25_Pipeline.ipynb` in more detail:** Path A defaults to 2 cameras (`Camera`, `Camera_01`) on `Warehouse_016`, so a full run fits in one Colab session — edit the `CAMERAS` and `SCENE` variables in its config cell to cover more cameras or another scene. Path B (depth maps, all cameras, official 3D-HOTA) is a separate, clearly marked section further down — optional, and only worth running once Path A works.
-
-All three notebooks cache outputs and downloaded models to Google Drive, so re-running after a disconnect only repeats the parts that changed.
+All three notebooks are self-contained (clone + install + download + run) and cache outputs/models to Google Drive, so re-running after a disconnect only repeats the parts that changed.
 
 ---
 
